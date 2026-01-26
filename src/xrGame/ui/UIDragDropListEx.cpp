@@ -5,9 +5,11 @@
 #include "UICellItem.h"
 #include "../../xrUI/UICursor.h"
 #include "../Inventory.h"
-
+#include "Actor.h"
+#include "../xrUI/Widgets/UI3tButton.h"
 
 CUIDragItem* CUIDragDropListEx::m_drag_item = nullptr;
+ref_sound CUIDragDropListEx::SFilterInfo::sndWhenChangingFilter;
 
 void CUICell::Clear()
 {
@@ -109,17 +111,18 @@ void CUIDragDropListEx::SendMessage(CUIWindow* pWnd, s16 msg, void* pData)
 	CUIWndCallback::OnEvent(pWnd, msg, pData);
 }
 
-void CUIDragDropListEx::InitDragDropList(Fvector2 pos, Fvector2 size)
+void CUIDragDropListEx::InitDragDropList(Fvector2 pos, Fvector2 size, Fvector2 offset)
 {
-	inherited::SetWndPos				(pos);
-	inherited::SetWndSize				(size);
-	m_vScrollBar->InitScrollBar			(Fvector2().set(size.x, 0.0f), size.y, false);
-	m_vScrollBar->SetWndPos				(Fvector2().set(m_vScrollBar->GetWndPos().x - m_vScrollBar->GetWidth(), m_vScrollBar->GetWndPos().y));
+    m_containerOffset = offset;
+    inherited::SetWndPos(pos);
+    inherited::SetWndSize(size);
+    m_vScrollBar->InitScrollBar(Fvector2().set(size.x, 0.0f), size.y - m_containerOffset.y, false);
+    m_vScrollBar->SetWndPos(Fvector2().set(m_vScrollBar->GetWndPos().x - m_vScrollBar->GetWidth() + m_containerOffset.x, m_vScrollBar->GetWndPos().y + m_containerOffset.y));
 }
 
 void CUIDragDropListEx::OnScrollV(CUIWindow* w, void* pData)
 {
-	m_container->SetWndPos		(Fvector2().set(m_container->GetWndPos().x, float(-m_vScrollBar->GetScrollPos())));
+    m_container->SetWndPos(Fvector2().set(m_container->GetWndPos().x + m_containerOffset.x, float(-m_vScrollBar->GetScrollPos()) + m_containerOffset.y));
 }
 
 void CUIDragDropListEx::CreateDragItem(CUICellItem* itm)
@@ -289,37 +292,88 @@ void CUIDragDropListEx::OnItemLButtonClick(CUIWindow* w, void* pData)
 
 void CUIDragDropListEx::GetClientArea(Frect& r)
 {
-	GetAbsoluteRect				(r);
-	if(m_vScrollBar->GetVisible() || m_flags.test(flAlwaysShowScroll))
-		r.x2 -= m_vScrollBar->GetWidth	();
+    GetAbsoluteRect(r);
+    if (m_vScrollBar->GetVisible() || m_flags.test(flAlwaysShowScroll))
+        r.x2 -= m_vScrollBar->GetWidth();
+    r.lt.add(m_containerOffset);
 }
 
 // FFx0001
 void CUIDragDropListEx::ClearAll(bool bDestroy, xr_vector<u16> IgnoredItemsIds)
 {
-	DestroyDragItem			();
-	m_container->ClearAll	(bDestroy, IgnoredItemsIds); // FFx0001
-	m_selected_item			= nullptr;
-	m_container->SetWndPos	(Fvector2().set(0,0));
-	ResetCellsCapacity		();
+    DestroyDragItem();
+    m_container->ClearAll(bDestroy, IgnoredItemsIds); // FFx0001
+    m_selected_item = nullptr;
+    m_container->SetWndPos(Fvector2().set(m_containerOffset.x, m_containerOffset.y));
+    ResetCellsCapacity();
 }
 
 void CUIDragDropListEx::Compact()
 {
 	xrCriticalSectionGuard guard(m_container->csUi);
-	CUIWindow::WINDOW_LIST& wl = m_container->GetChildWndList();
+    xr_list<CUIWindow*> tempHolder;
+    for (const auto& item : m_container->GetChildWndList())
+    {
+        tempHolder.emplace_back(item);
+        CUICellItem* casted = smart_cast<CUICellItem*>(item);
+        const u32 cached = casted->ChildsCount();
+        for (int i = 0; i < cached; i++)
+        {
+            CUICellItem* child = casted->PopChild(nullptr);
+            tempHolder.emplace_back(child);
+            R_ASSERT2(!child->ChildsCount(), "Child of childs are not expected!");
+        }
+    }
+
 	ClearAll(false);
 
-	for (CUIWindow* child : wl)
-	{
-		CUICellItem* itm = child->ui_cast_cell_item();
-		SetItem(itm);
-	}
+    for (auto& item : tempHolder)
+    {
+        SetItem(static_cast<CUICellItem*>(item));
+    }
 }
 
 void CUIDragDropListEx::Draw()
 {
-	inherited::Draw				();
+    if (this->IsPlayingAnimation())
+    {
+        auto updateItemsAccordingToNewFilter = [&]
+        {
+            m_currentActiveFilter = m_newFilterWeAreSwitchingTo;
+            m_newFilterWeAreSwitchingTo = nullptr;
+            this->Compact();
+        };
+
+        const float timePassedSinceStartOfAnimation = Device.fTimeGlobal - m_timeWhenFilterSwitchingAnimationStarted;
+
+        if (timePassedSinceStartOfAnimation > SFilterInfo::sndWhenChangingFilter.get_length_sec()) // animation should be stopped
+        {
+            m_timeWhenFilterSwitchingAnimationStarted = -1.f;
+            m_container->SetIconsTransparency(1.f);
+            if (m_newFilterWeAreSwitchingTo) // i think it can happen, if game would be freezed for too long
+            {
+                updateItemsAccordingToNewFilter();
+            }
+        }
+        else
+        {
+            const float halfTime = SFilterInfo::sndWhenChangingFilter.get_length_sec() * 0.5f;
+            if (timePassedSinceStartOfAnimation > halfTime) // fade in stage
+            {
+                if (m_newFilterWeAreSwitchingTo)
+                {
+                    updateItemsAccordingToNewFilter();
+                }
+                m_container->SetIconsTransparency(timePassedSinceStartOfAnimation / halfTime - 1.f);
+            }
+            else // fade out stage
+            {
+                m_container->SetIconsTransparency(1.f - timePassedSinceStartOfAnimation / halfTime);
+            }
+        }
+    }
+
+    inherited::Draw();
 
 	if(0 && bDebug){
 		CGameFont* F		= UI().Font().pFontDI;
@@ -330,7 +384,6 @@ void CUIDragDropListEx::Draw()
 		Ivector2			pt = m_container->PickCell(GetUICursor().GetCursorPosition());
 		F->OutNext			("%d-%d",pt.x, pt.y);
 	};
-
 }
 
 void CUIDragDropListEx::Update()
@@ -352,28 +405,28 @@ void CUIDragDropListEx::Update()
 
 void CUIDragDropListEx::ReinitScroll()
 {
-		float h1 = m_container->GetWndSize().y;
-		float h2 = GetWndSize().y;
-		VERIFY						(_valid(h1));
-		VERIFY						(_valid(h2));
-		float dh = h1-h2;
-		m_vScrollBar->Show			( (dh > 0) || m_flags.test(flAlwaysShowScroll) );
-		m_vScrollBar->Enable		( (dh > 0) || m_flags.test(flAlwaysShowScroll) );
+    float h1 = m_container->GetWndSize().y + m_containerOffset.y;
+    float h2 = GetWndSize().y;
+    VERIFY(_valid(h1));
+    VERIFY(_valid(h2));
+    float dh = h1 - h2;
+    m_vScrollBar->Show((dh > 0) || m_flags.test(flAlwaysShowScroll));
+    m_vScrollBar->Enable((dh > 0) || m_flags.test(flAlwaysShowScroll));
 
-		if ( dh < 0 )
-		{
-//			dh = 0;
-			m_vScrollBar->SetRange	(0, 0);
-		}
-		else
-		{
-			m_vScrollBar->SetRange	(0, iFloor(dh));
-		}
-		m_vScrollBar->SetScrollPos	(0);
-		m_vScrollBar->SetStepSize	(CellSize().y/3);
-		m_vScrollBar->SetPageSize	( 1/*CellSize().y*/ );
-		m_vScrollBar->SetWndSize({ m_vScrollBar->GetWndSize().x, h2 });
-		m_container->SetWndPos		(Fvector2().set(0,0));
+    if (dh < 0)
+    {
+        // dh = 0;
+        m_vScrollBar->SetRange(0, 0);
+    }
+    else
+    {
+        m_vScrollBar->SetRange(0, iFloor(dh));
+    }
+    m_vScrollBar->SetScrollPos(0);
+    m_vScrollBar->SetStepSize(CellSize().y / 3);
+    m_vScrollBar->SetPageSize(1 /*CellSize().y*/);
+    m_vScrollBar->SetWndSize({m_vScrollBar->GetWndSize().x, h2});
+    m_container->SetWndPos(Fvector2().set(m_containerOffset.x, m_containerOffset.y));
 }
 
 bool CUIDragDropListEx::OnMouseAction(float x, float y, EUIMessages mouse_action)
@@ -431,6 +484,35 @@ int CUIDragDropListEx::ScrollPos()
 	return m_vScrollBar->GetScrollPos();
 }
 
+void CUIDragDropListEx::ActivateFiltersMode(std::initializer_list<SFilterInfo> inListDescribingFilterButtonAndCallback)
+{
+    R_ASSERT2(!m_currentActiveFilter, "Filters mode is already activated!");
+    R_ASSERT2(inListDescribingFilterButtonAndCallback.size() > 1, "There should be more filters");
+    m_filters.reserve(inListDescribingFilterButtonAndCallback.size());
+
+    for (auto& it : inListDescribingFilterButtonAndCallback)
+    {
+        R_ASSERT2(it.pToBtn->GetParent() == this, "Filter switching button should be child of me!");
+        this->Register(it.pToBtn);
+        this->AddCallback
+        (
+            it.pToBtn,
+            BUTTON_CLICKED,
+            CUIWndCallback::void_function(this, &CUIDragDropListEx::OnFilterButtonClicked)
+        );
+        m_filters.emplace_back(it);
+    }
+
+    m_currentActiveFilter = &m_filters.front();
+    m_currentActiveFilter->pToBtn->Enable(false);
+    this->Compact();
+
+    if (!SFilterInfo::sndWhenChangingFilter._p) //was it initialized earlier by another instance of class?
+    {
+        SFilterInfo::sndWhenChangingFilter.create("interface\\inv_filter_changed", st_Effect, SOUND_TYPE_ITEM_USING);
+    }
+}
+
 void CUIDragDropListEx::SetItem(CUICellItem* itm) //auto
 {
 	if(m_container->AddSimilar(itm)){
@@ -462,11 +544,23 @@ void CUIDragDropListEx::SetItem(CUICellItem* itm, Ivector2 cell_pos) // start at
 	if(m_container->AddSimilar(itm))	return;
 	R_ASSERT						(m_container->IsRoomFree(cell_pos, itm->GetGridSize()));
 
-	m_container->PlaceItemAtPos	(itm, cell_pos);
-
+    m_container->AttachChild(itm);
+    itm->OnAfterChild(this);
 	itm->SetWindowName			("cell_item");
 	Register					(itm);
 	itm->SetOwnerList			(this);
+
+    if (!m_currentActiveFilter || m_currentActiveFilter->isBelongsToCategoryCallback(static_cast<const PIItem>(itm->m_pData)))
+    {
+        m_container->PlaceItemAtPos(itm, cell_pos);
+        itm->Enable(true);
+        Register(itm);
+    }
+    else
+    {
+        itm->Enable(false);
+        itm->SetMessageTarget(nullptr); // Unregister
+    }
 }
 bool CUIDragDropListEx::CanSetItem(CUICellItem* itm){
 	if (m_container->HasFreeSpace(itm->GetGridSize()))
@@ -546,6 +640,42 @@ CUICell& CUIDragDropListEx::GetCellAt(const Ivector2& pos)
 {
 	return m_container->GetCellAt(pos);
 };
+
+bool CUIDragDropListEx::IsPlayingAnimation()
+{
+    return m_timeWhenFilterSwitchingAnimationStarted > 0.f;
+}
+
+void CUIDragDropListEx::OnFilterButtonClicked(CUIWindow* w, void* pData)
+{
+    if (this->IsPlayingAnimation())
+        return;
+    auto* casted = static_cast<CUI3tButton*>(w);
+
+    for (auto& filter : m_filters)
+    {
+        if (filter.pToBtn == casted)
+        {
+            for (const auto* it : m_container->m_ChildWndList) // are there any items belong to clicked filter?
+            {
+                PIItem invItem = static_cast<PIItem>(static_cast<const CUICellItem*>(it)->m_pData);
+                if (filter.isBelongsToCategoryCallback(invItem))
+                {
+                    // yeah, we have at least one item of such kind. Lets play switching animation!
+                    casted->Enable(false);
+                    m_currentActiveFilter->pToBtn->Enable(true);
+                    SFilterInfo::sndWhenChangingFilter.play(Actor(), sm_2D);
+                    m_newFilterWeAreSwitchingTo = &filter;
+                    m_timeWhenFilterSwitchingAnimationStarted = Device.fTimeGlobal;
+                    break;
+                }
+            }
+            // ..dont do anything otherwise
+            return;
+        }
+    }
+    R_ASSERT2(false, "Should not be here");
+}
 // =================================================================================================
 
 CUICellContainer::CUICellContainer(CUIDragDropListEx* parent)
@@ -650,10 +780,6 @@ void CUICellContainer::PlaceItemAtPos(CUICellItem* itm, Ivector2& cell_pos)
 
 		itm->SetWndPos(AlignPos);
 	}
-
-
-	AttachChild				(itm);
-	itm->OnAfterChild		(m_pParentDragDropList);
 }
 
 CUICellItem* CUICellContainer::RemoveItem(CUICellItem* itm, bool force_root)
@@ -680,18 +806,21 @@ CUICellItem* CUICellContainer::RemoveItem(CUICellItem* itm, bool force_root)
 		return				iii;
 	}
 
-	Ivector2 pos			= GetItemPos(itm);
-	Ivector2 cs				= itm->GetGridSize();
+    if (itm->IsEnabled())
+    {
+        Ivector2 pos = GetItemPos(itm);
+        Ivector2 cs = itm->GetGridSize();
 
-	if(m_pParentDragDropList->GetVerticalPlacement())
-		std::swap(cs.x,cs.y);
+        if (m_pParentDragDropList->GetVerticalPlacement())
+            std::swap(cs.x, cs.y);
 
-	for(int x=0; x<cs.x;++x)
-		for(int y=0; y<cs.y;++y)
-		{
-			CUICell& C		= GetCellAt(Ivector2().set(x,y).add(pos));
-			C.Clear			();
-		}
+        for (int x = 0; x < cs.x; ++x)
+            for (int y = 0; y < cs.y; ++y)
+            {
+                CUICell& C = GetCellAt(Ivector2().set(x, y).add(pos));
+                C.Clear();
+            }
+    }
 
 	itm->SetOwnerList		(nullptr);
 	DetachChild				(itm);
@@ -1065,21 +1194,34 @@ void CUICellContainer::Draw()
 	UIRender->SetShader( *hShader );
 	UIRender->FlushPrimitive();
 
-	//draw shown items in range
-	if ( m_cells_to_draw.size() )
-	{
-		UI_CELLS_VEC_IT it = m_cells_to_draw.begin();
-		for ( ; it != m_cells_to_draw.end(); ++it ) // all cells
-		{
-			CUICell& cell = (*it);
-			if ( !cell.Empty() && (cell.m_item->m_drawn_frame != Device.dwFrame) )
-			{
-				cell.m_item->Draw();
-			}
-		}
-	}
+    // draw shown items in range
+    if (m_cells_to_draw.size())
+    {
+        if (m_iconsTransparency != m_iconsLastDrawTransparency)
+        {
+            for (auto& cell : m_cells_to_draw) // all cells
+            {
+                if (!cell.Empty() && (cell.m_item->m_drawn_frame != Device.dwFrame))
+                {
+                    cell.m_item->SetTransparencyForAllCellContent(std::numeric_limits<u8>::max() * m_iconsTransparency);
+                    cell.m_item->Draw();
+                }
+            }
+            m_iconsLastDrawTransparency = m_iconsTransparency;
+        }
+        else
+        {
+            for (auto& cell : m_cells_to_draw) // all cells
+            {
+                if (!cell.Empty() && (cell.m_item->m_drawn_frame != Device.dwFrame))
+                {
+                    cell.m_item->Draw();
+                }
+            }
+        }
+    }
 
-	UI().PopScissor			();
+    UI().PopScissor();
 }
 
 void CUICellContainer::clear_select_armament()
@@ -1094,6 +1236,11 @@ void CUICellContainer::clear_select_armament()
 			cell.m_item->m_select_armament = false;
 		}
 	}
+}
+
+void CUICellContainer::SetIconsTransparency(const float inValue)
+{
+    m_iconsTransparency = inValue;
 }
 
 #undef ty

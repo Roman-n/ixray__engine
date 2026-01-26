@@ -54,6 +54,44 @@
 		<texture id="ui_inGame2_detector_highlighter" x="307" y="820" width="96" height="48" />
 		<texture id="ui_inGame2_quick_item_highlighter" x="410" y="549" width="66" height="59" />
 		<texture id="ui_inGame2_artefakt_highlighter" x="410" y="614" width="52" height="52" />
+    </file>
 
-   </file>
+    <!-- inv sorting -->
+    <file name="ui\ui_inventory_filters">
+        <!-- "ALL" filter -->
+        <texture id="ui_filter_all_btn_d" x="8" y="137" width="100" height="100" />
+        <texture id="ui_filter_all_btn_t" x="8" y="137" width="100" height="100" />
+        <texture id="ui_filter_all_btn_h" x="8" y="10" width="100" height="100" />
+        <texture id="ui_filter_all_btn_e" x="8" y="10" width="100" height="100" />
+        <!-- "MEDICINE" filter -->
+        <texture id="ui_filter_medicine_btn_d" x="141" y="137" width="100" height="100" />
+        <texture id="ui_filter_medicine_btn_h" x="141" y="10" width="100" height="100" />
+        <texture id="ui_filter_medicine_btn_t" x="141" y="137" width="100" height="100" />
+        <texture id="ui_filter_medicine_btn_e" x="141" y="10" width="100" height="100" />
+        <!-- "GUNS" filter -->
+        <texture id="ui_filter_guns_btn_d" x="266" y="137" width="100" height="100" />
+        <texture id="ui_filter_guns_btn_h" x="266" y="10" width="100" height="100" />
+        <texture id="ui_filter_guns_btn_t" x="266" y="137" width="100" height="100" />
+        <texture id="ui_filter_guns_btn_e" x="266" y="10" width="100" height="100" />
+        <!-- "AMMO" filter -->
+        <texture id="ui_filter_ammo_btn_d" x="397" y="140" width="100" height="100" />
+        <texture id="ui_filter_ammo_btn_h" x="397" y="13" width="100" height="100" />
+        <texture id="ui_filter_ammo_btn_t" x="397" y="140" width="100" height="100" />
+        <texture id="ui_filter_ammo_btn_e" x="397" y="13" width="100" height="100" />
+        <!-- "OUTFITS" filter -->
+        <texture id="ui_filter_outfits_btn_d" x="528" y="139" width="100" height="100" />
+        <texture id="ui_filter_outfits_btn_h" x="528" y="12" width="100" height="100" />
+        <texture id="ui_filter_outfits_btn_t" x="528" y="139" width="100" height="100" />
+        <texture id="ui_filter_outfits_btn_e" x="528" y="12" width="100" height="100" />
+        <!-- "OTHER" filter -->
+        <texture id="ui_filter_other_btn_d" x="655" y="137" width="100" height="100" />
+        <texture id="ui_filter_other_btn_h" x="655" y="10" width="100" height="100" />
+        <texture id="ui_filter_other_btn_t" x="655" y="137" width="100" height="100" />
+        <texture id="ui_filter_other_btn_e" x="655" y="10" width="100" height="100" />
+        <!-- "ARTEFACTS" filter -->
+        <texture id="ui_filter_artefacts_btn_d" x="780" y="138" width="100" height="100" />
+        <texture id="ui_filter_artefacts_btn_h" x="780" y="11"  width="100" height="100" />
+        <texture id="ui_filter_artefacts_btn_t" x="780" y="138" width="100" height="100" />
+        <texture id="ui_filter_artefacts_btn_e" x="780" y="11"  width="100" height="100" />
+    </file>
 </w>

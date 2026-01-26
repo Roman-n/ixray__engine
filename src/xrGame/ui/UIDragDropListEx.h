@@ -31,8 +31,17 @@ struct CUICell{
 typedef xr_vector<CUICell>			UI_CELLS_VEC;
 typedef UI_CELLS_VEC::iterator		UI_CELLS_VEC_IT;
 
+// Romann: Забанил ошибку, компилятор ругается на 43 строку, хз почему, кто шарит исправьте пж.
+#pragma warning(disable : 4430)
 class CUIDragDropListEx :public CUIWindow, public CUIWndCallback
 {
+public:
+    struct SFilterInfo
+    {
+        static ref_sound sndWhenChangingFilter;
+        CUI3tButton* pToBtn;
+        bool(*isBelongsToCategoryCallback)(const PIItem);
+    };
 private:
 	typedef CUIWindow inherited;
 
@@ -63,12 +72,21 @@ protected:
 	virtual void			OnItemFocusReceived		(CUIWindow* w, void* pData);
 	virtual void			OnItemFocusLost			(CUIWindow* w, void* pData);
 	virtual void			OnItemFocusedUpdate		(CUIWindow* w, void* pData);
-	
+
+    Fvector2               m_containerOffset;
+    xr_vector<SFilterInfo> m_filters;
+    SFilterInfo*           m_currentActiveFilter = nullptr;
+    SFilterInfo*           m_newFilterWeAreSwitchingTo = nullptr;
+    float                  m_timeWhenFilterSwitchingAnimationStarted = -1.f;
+    ref_sound              m_filterSwitchingSound;
+    bool                   IsPlayingAnimation();
+    void                   OnFilterButtonClicked(CUIWindow* w, void* pData);
+
 public:
 	static CUIDragItem*		m_drag_item;
 							CUIDragDropListEx	();
 	virtual					~CUIDragDropListEx	();
-				void		InitDragDropList		(Fvector2 pos, Fvector2 size);
+           void             InitDragDropList(Fvector2 pos, Fvector2 size, Fvector2 offset);
 
 	typedef					xr_delegate<bool(CUICellItem*)>			DRAG_CELL_EVENT;
 	typedef					xr_delegate<void(CUIDragItem*, bool)>	DRAG_ITEM_EVENT;
@@ -118,7 +136,8 @@ public:
 
 			bool			GetConditionProgBarVisibility() {return m_bConditionProgBarVisible;};
 			void			SetConditionProgBarVisibility(bool b) {m_bConditionProgBarVisible = b;};
-public:
+
+            void            ActivateFiltersMode(std::initializer_list<SFilterInfo> inListDescribingFilterButtonAndCallback);
 			// items management
 			virtual void	SetItem				(CUICellItem* itm); //auto
 			virtual bool	SetItem				(CUICellItem* itm, Fvector2 abs_pos);  // start at cursor pos
@@ -139,7 +158,6 @@ public:
 			CUICell&		GetCellAt			(const Ivector2& pos);
 			CUICellContainer* GetContainer		() { return m_container; }; //Alundaio
 
-public:
 	//UIWindow overriding
 	virtual		void		Draw				();
 	virtual		void		Update				();
@@ -160,6 +178,7 @@ private:
 	typedef CUIWindow inherited;
 	ui_shader					hShader;
 	UI_CELLS_VEC				m_cells_to_draw;
+    float                       m_iconsLastDrawTransparency = 1.f;
 protected:
 	CUIDragDropListEx*			m_pParentDragDropList;
 
@@ -172,6 +191,7 @@ protected:
 	void						GetTexUVLT			(Fvector2& uv, u32 col, u32 row, u8 select_mode);
 	void						ReinitSize			();
 	u32							GetCellsInRange		(const Irect& rect, UI_CELLS_VEC& res);
+    float                       m_iconsTransparency = 1.f;
 
 public:							
 								CUICellContainer	(CUIDragDropListEx* parent);
@@ -179,6 +199,7 @@ public:
 				CUICell&		GetCellAt			(const Ivector2& pos);
 				Ivector2		PickCell			(const Fvector2& abs_pos);
 				bool			ValidCell			(const Ivector2& pos) const;
+                void            SetIconsTransparency(const float inValue);
 
 	virtual CUIWindow* ui_cast_window() { return this; }
 

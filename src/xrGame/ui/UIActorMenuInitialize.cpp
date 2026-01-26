@@ -24,6 +24,10 @@
 #include "../../xrUI/ui_base.h"
 #include "../../xrEngine/string_table.h"
 #include "ui_drop_amount.h"
+#include "ActorHelmet.h"
+#include "ActorBackpack.h"
+#include "WeaponBinoculars.h"
+#include "medicine.h"
 
 CUIActorMenu::CUIActorMenu()
 {
@@ -175,15 +179,74 @@ void CUIActorMenu::Construct()
 	}
 	uiXml.SetLocalRoot(stored_root);
 
-	m_pInventoryBagList			= UIHelperGame::CreateDragDropListEx(uiXml, "dragdrop_bag", this);
-	m_pInventoryBeltList		= UIHelperGame::CreateDragDropListEx(uiXml, "dragdrop_belt", this);
+    m_pInventoryBagList    = UIHelperGame::CreateDragDropListEx(uiXml, "dragdrop_bag", this);
+    m_pTradeActorBagList   = UIHelperGame::CreateDragDropListEx(uiXml, "dragdrop_actor_trade_bag", this);
+    m_pTradePartnerBagList = UIHelperGame::CreateDragDropListEx(uiXml, "dragdrop_partner_bag", this);
+    m_pDeadBodyBagList     = UIHelperGame::CreateDragDropListEx(uiXml, "dragdrop_deadbody_bag", this);
+    {
+        struct callbacksForFilters
+        {
+            static bool NoFiltering(const PIItem inItem)
+            {
+                return true;
+            };
 
-	m_pTradeActorBagList		= UIHelperGame::CreateDragDropListEx(uiXml, "dragdrop_actor_trade_bag", this);
-	m_pTradeActorList			= UIHelperGame::CreateDragDropListEx(uiXml, "dragdrop_actor_trade", this);
-	m_pTradePartnerBagList		= UIHelperGame::CreateDragDropListEx(uiXml, "dragdrop_partner_bag", this);
-	m_pTradePartnerList			= UIHelperGame::CreateDragDropListEx(uiXml, "dragdrop_partner_trade", this);
-	m_pDeadBodyBagList			= UIHelperGame::CreateDragDropListEx(uiXml, "dragdrop_deadbody_bag", this);
-	if (uiXml.NavigateToNode("dragdrop_quick_slots"))
+            static bool isGunFilterChecker(const PIItem inItem)
+            {
+                return smart_cast<const CWeaponMagazined*>(inItem) && !smart_cast<const CWeaponBinoculars*>(inItem);
+            };
+
+            static bool isAmmoFilterChecker(const PIItem inItem)
+            {
+                return smart_cast<const CWeaponAmmo*>(inItem);
+            };
+
+            static bool isOutfitFilterChecker(const PIItem inItem)
+            {
+                return smart_cast<const CCustomOutfit*>(inItem) || smart_cast<const CHelmet*>(inItem) || smart_cast<const CBackpack*>(inItem);
+            };
+
+            static bool isMedicineFilterChecker(const PIItem inItem)
+            {
+                return smart_cast<const CMedicineItem*>(inItem);
+            };
+
+            static bool isArtefactFilterChecker(const PIItem inItem)
+            {
+                return smart_cast<const CArtefact*>(inItem);
+            };
+
+            static bool isOtherFilterChecker(const PIItem inItem)
+            {
+                return !(isGunFilterChecker(inItem) || isAmmoFilterChecker(inItem) || isOutfitFilterChecker(inItem) || isMedicineFilterChecker(inItem) || isArtefactFilterChecker(inItem));
+            };
+        };
+        // binder-helper
+        auto bindToDandDList = [&] (CUIDragDropListEx* const targetList)
+        {
+            targetList->ActivateFiltersMode
+            (
+                {
+                    {UIHelper::Create3tButton(uiXml, "filters_buttons:all_btn",targetList), callbacksForFilters::NoFiltering},
+                    {UIHelper::Create3tButton(uiXml, "filters_buttons:guns_btn",targetList), callbacksForFilters::isGunFilterChecker},
+                    {UIHelper::Create3tButton(uiXml, "filters_buttons:ammo_btn",targetList), callbacksForFilters::isAmmoFilterChecker},
+                    {UIHelper::Create3tButton(uiXml, "filters_buttons:outfits_btn",targetList), callbacksForFilters::isOutfitFilterChecker},
+                    {UIHelper::Create3tButton(uiXml, "filters_buttons:medicine_btn",targetList), callbacksForFilters::isMedicineFilterChecker},
+                    {UIHelper::Create3tButton(uiXml, "filters_buttons:artefacts_btn",targetList), callbacksForFilters::isArtefactFilterChecker},
+                    {UIHelper::Create3tButton(uiXml, "filters_buttons:other_btn",targetList), callbacksForFilters::isOtherFilterChecker},
+                }
+            );
+        };
+        bindToDandDList(m_pInventoryBagList);
+        bindToDandDList(m_pTradeActorBagList);
+        bindToDandDList(m_pTradePartnerBagList);
+        bindToDandDList(m_pDeadBodyBagList);
+    }
+
+    m_pInventoryBeltList   = UIHelperGame::CreateDragDropListEx(uiXml, "dragdrop_belt", this);
+    m_pTradeActorList      = UIHelperGame::CreateDragDropListEx(uiXml, "dragdrop_actor_trade", this);
+    m_pTradePartnerList    = UIHelperGame::CreateDragDropListEx(uiXml, "dragdrop_partner_trade", this);
+    if (uiXml.NavigateToNode("dragdrop_quick_slots"))
 	{
 		m_pQuickSlot = UIHelperGame::CreateDragDropReferenceList(uiXml, "dragdrop_quick_slots", this);
 		m_pQuickSlot->Initialize();

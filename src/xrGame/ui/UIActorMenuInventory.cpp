@@ -16,6 +16,7 @@
 #include "UIMainIngameWnd.h"
 #include "UIGameCustom.h"
 #include "eatable_item_object.h"
+#include "medicine.h"
 
 #include "../Silencer.h"
 #include "../Scope.h"
@@ -24,8 +25,6 @@
 #include "../eatable_item.h"
 #include "../BottleItem.h"
 #include "../WeaponMagazined.h"
-#include "../medkit.h"
-#include "../antirad.h"
 #include "../CustomOutfit.h"
 #include "../ActorHelmet.h"
 #include "../../xrUI/UICursor.h"

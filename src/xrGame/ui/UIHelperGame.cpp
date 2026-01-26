@@ -41,7 +41,10 @@ bool CUIXmlInitGame::InitDragDropListEx(CUIXml& xml_doc, LPCSTR path, int index,
 
 	CUIXmlInit::InitAlignment(xml_doc, path, index, pos.x, pos.y, pWnd);
 
-	pWnd->InitDragDropList(pos, size);
+    Fvector2 offset;
+    offset.x = xml_doc.ReadAttribFlt(path, index, "offset_x", 0.f);
+    offset.y = xml_doc.ReadAttribFlt(path, index, "offset_y", 0.f);
+    pWnd->InitDragDropList(pos, size, offset);
 
 	Ivector2 w_cell_sz, w_cells, w_cell_sp;
 

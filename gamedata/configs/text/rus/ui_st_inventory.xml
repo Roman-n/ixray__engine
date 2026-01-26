@@ -300,4 +300,59 @@
 	<string id="st_dress_helmet">
 		<text>надеть шлем</text>
 	</string>
+
+    <string id="st_inv_sort_all">
+        <text>Всё</text>
+    </string>
+    <string id="st_inv_sort_all_hint">
+        <text>Показать все элементы</text>
+    </string>
+    <string id="st_inv_sort_weapons">
+        <text>Оружие</text>
+    </string>
+    <string id="st_inv_sort_weapons_hint">
+        <text>Показывать только оружие</text>
+    </string>
+    <string id="st_inv_sort_ammo">
+        <text>Патроны</text>
+    </string>
+    <string id="st_inv_sort_ammo_hint">
+        <text>Показать только боеприпасы</text>
+    </string>
+    <string id="st_inv_sort_armor">
+        <text>Броня</text>
+    </string>
+    <string id="st_inv_sort_armor_hint">
+        <text>Показать только броню</text>
+    </string>
+    <string id="st_inv_sort_devices">
+        <text>Устройства</text>
+    </string>
+    <string id="st_inv_sort_devices_hint">
+        <text>Показать только устройства</text>
+    </string>
+    <string id="st_inv_sort_consumables">
+        <text>Расходные материалы</text>
+    </string>
+    <string id="st_inv_sort_consumables_hint">
+        <text>Показать только расходные материалы</text>
+    </string>
+    <string id="st_inv_sort_artefacts">
+        <text>Трофеи</text>
+    </string>
+    <string id="st_inv_sort_artefacts_hint">
+        <text>Показать только артефакты</text>
+    </string>
+    <string id="st_inv_sort_attachments">
+        <text>Аддоны</text>
+    </string>
+    <string id="st_inv_sort_attachments_hint">
+        <text>Показать только Аддоны</text>
+    </string>
+    <string id="st_inv_sort_medicine">
+        <text>Медикаменты</text>
+    </string>
+    <string id="st_inv_sort_medicine_hint">
+        <text>Показать только медикаменты</text>
+    </string>
 </string_table>

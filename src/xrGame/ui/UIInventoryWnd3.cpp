@@ -21,6 +21,7 @@
 #include "../game_sv_single.h"
 #include "ai_object_location.h"
 #include "../ActorHelmet.h"
+#include "medicine.h"
 
 void CUIInventoryWnd::EatItem(PIItem itm)
 {
@@ -34,8 +35,6 @@ void CUIInventoryWnd::EatItem(PIItem itm)
 	PlaySnd									(eInvItemUse);
 }
 
-#include "../medkit.h"
-#include "../antirad.h"
 void CUIInventoryWnd::ActivatePropertiesBox()
 {
 	TryHidePropertiesBox();

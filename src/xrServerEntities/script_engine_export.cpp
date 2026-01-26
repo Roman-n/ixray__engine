@@ -253,6 +253,10 @@ void export_classes	(lua_State *L)
 	CActor::script_register(L);
 	CEatableItem::script_register(L);
 	
+	CMedkit::script_register(L);
+    CBandage::script_register(L);
+	CAntirad::script_register(L);
+    CStimulator::script_register(L);
 	CALifeMonsterBrain::script_register(L);
 	CALifeHumanBrain::script_register(L);
 	CGameGraph::script_register(L);
@@ -260,7 +264,6 @@ void export_classes	(lua_State *L)
 	ScriptEvent::script_register(L);
 	CInventoryBox::script_register(L);
 	CActorCondition::script_register(L);
-	CAntirad::script_register(L);
 	CBottleItem::script_register(L);
 	CCustomOutfit::script_register(L);
 	CCustomZone::script_register(L);
@@ -268,7 +271,6 @@ void export_classes	(lua_State *L)
 	CHudItem::script_register(L);
 	CInventoryItem::script_register(L);
 	CInventoryOwner::script_register(L);
-	CMedkit::script_register(L);
 	CPhysicsShellHolder::script_register(L);
 	CWeaponAmmo::script_register(L);
 	CGameTaskManager::script_register(L);

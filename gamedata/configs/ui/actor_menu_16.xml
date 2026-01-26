@@ -230,8 +230,7 @@
 	</partner_weight>
 
 	<!-- partner  -->
-	<left_delimiter x="102" y="226" width="273" height="163" stretch="1">
-		<texture>ui_inGame2_center_trade_devider</texture>
+	<left_delimiter x="102" y="209" width="273" height="163" stretch="1">
 		<!--trade_caption x="123" y="74" width="48" height="16">
 			<text align="l" font="letterica16" color="ui_3">ui_total_price</text>
 		</trade_caption-->
@@ -243,8 +242,7 @@
 		</trade_weight_max>
 	</left_delimiter>
 	<!-- actor -->
-	<right_delimiter x="648" y="226" width="273" height="163" stretch="1">
-	    <texture>ui_inGame2_center_trade_devider</texture>
+	<right_delimiter x="648" y="209" width="273" height="163" stretch="1">
 	    <!--trade_caption x="123" y="74" width="48" height="16">
 	    	<text align="r" font="letterica16" color="ui_3">ui_total_price</text>
 	    </trade_caption-->
@@ -267,9 +265,10 @@
   <dragdrop_trash x="0" y="0" width="375" height="768"
     	cell_width="375" cell_height="768" rows_num="1" cols_num="1" a="0"/>
 
-  <dragdrop_bag x="662" y="119" width="247" height="574"
+  <dragdrop_bag x="662" y="110" width="250" height="600"
     	cell_width="33" cell_height="41" rows_num="14" cols_num="7"
-		unlimited="1" group_similar="1" always_show_scroll="1" condition_progress_bar="1"/>
+		unlimited="1" group_similar="1" always_show_scroll="1" condition_progress_bar="1"
+		offset_x = "0" offset_y = "40"/>
 
 	<dragdrop_belt x="390" y="480" width="240" height="41"
 		cell_width="33" cell_height="41" rows_num="1" cols_num="5"
@@ -279,27 +278,30 @@
 		cell_width="33" cell_height="41" rows_num="4" cols_num="7"
 		unlimited="1" group_similar="1" always_show_scroll="1" condition_progress_bar="1"/>
 
-	<dragdrop_actor_trade_bag x="662" y="340" width="247" height="369"
+	<dragdrop_actor_trade_bag x="662" y="312" width="250" height="405"
 		cell_width="33" cell_height="41" rows_num="9" cols_num="7"
-		unlimited="1" group_similar="1" always_show_scroll="1" condition_progress_bar="1"/>
+		unlimited="1" group_similar="1" always_show_scroll="1" condition_progress_bar="1"
+		offset_x = "0" offset_y = "35"/>
 
 	<dragdrop_partner_trade x="117" y="114" width="247" height="164"
 	    cell_width="33" cell_height="41" rows_num="4" cols_num="7"
 	    unlimited="1" group_similar="1" always_show_scroll="1" condition_progress_bar="1"/>
 
-	<dragdrop_partner_bag x="117" y="340" width="247" height="369"
+	<dragdrop_partner_bag x="117" y="312" width="250" height="405"
 	    cell_width="33" cell_height="41" rows_num="9" cols_num="7"
-	    unlimited="1" group_similar="1" always_show_scroll="1" condition_progress_bar="1"/>
+	    unlimited="1" group_similar="1" always_show_scroll="1" condition_progress_bar="1"
+		offset_x = "0" offset_y = "35"/>
 
-	<dragdrop_deadbody_bag x="117" y="119" width="247" height="574"
+	<dragdrop_deadbody_bag x="117" y="110" width="250" height="580"
 	    cell_width="33" cell_height="41" rows_num="14" cols_num="7"
-	    unlimited="1" group_similar="1" always_show_scroll="1" condition_progress_bar="1"/>
+	    unlimited="1" group_similar="1" always_show_scroll="1" condition_progress_bar="1"
+		offset_x = "0" offset_y = "40"/>
 
 	<dragdrop_quick_slots x="398" y="407" width="227" height="41"
 	    cell_width="33" cell_height="41" a="0" rows_num="1"	cols_num="4"
 		cell_sp_x="32" cell_sp_y="0" custom_placement="1"/>
 
-	<trade_buy_button x="113" y="295" width="107" height="26" stretch="1" hint="ui_st_buy_hint">
+	<trade_buy_button x="117" y="278" width="107" height="26" stretch="1" hint="ui_st_buy_hint" light_anim="ui_slow_blinking_alpha">
 	    <window_name>trade_buy_button</window_name>
 	    <texture>ui_inGame2_inventory_button</texture>
 	    <text font="graffiti22" align="c">ui_st_buy</text>
@@ -311,7 +313,7 @@
 	    </text_color>
 	</trade_buy_button>
 
-	<trade_sell_button x="660" y="295" width="107" height="26" stretch="1" hint="ui_st_sell_hint">
+	<trade_sell_button x="662" y="278" width="107" height="26" stretch="1" hint="ui_st_sell_hint" light_anim="ui_slow_blinking_alpha">
 	    <window_name>trade_sell_button</window_name>
 	    <texture>ui_inGame2_inventory_button</texture>
 	    <text font="graffiti22" align="c">ui_st_sell</text>
@@ -507,4 +509,49 @@
 	        </state_progress>
 	    </power_sensor>
 	</actor_state_info>
+
+    <!-- inv sorting -->
+    <filters_buttons>
+        <all_btn x="7" y="3" width="30" height="30" stretch="1">
+            <window_name>filter_all_btn</window_name>
+            <texture>ui_filter_all_btn</texture>
+            <hint>st_inv_sort_all_hint</hint>
+        </all_btn>
+
+        <guns_btn x="40" y="3" width="30" height="30" stretch="1"  light_anim="ui_slow_blinking_alpha">
+            <window_name>filter_guns_btn</window_name>
+            <texture>ui_filter_guns_btn</texture>
+            <hint>st_inv_sort_weapons_hint</hint>
+        </guns_btn>
+
+        <ammo_btn x="73" y="3" width="30" height="30" stretch="1" light_anim="ui_slow_blinking_alpha">
+            <window_name>filter_ammo_btn</window_name>
+            <texture>ui_filter_ammo_btn</texture>
+            <hint>st_inv_sort_ammo_hint</hint>
+        </ammo_btn>
+
+        <outfits_btn x="106" y="3" width="30" height="30" stretch="1" light_anim="ui_slow_blinking_alpha">
+            <window_name>filter_outfits_btn</window_name>
+            <texture>ui_filter_outfits_btn</texture>
+            <hint>st_inv_sort_armor_hint</hint>
+        </outfits_btn>
+
+        <medicine_btn x="139" y="3" width="30" height="30" stretch="1" light_anim="ui_slow_blinking_alpha">
+            <window_name>filter_medicine_btn</window_name>
+            <texture>ui_filter_medicine_btn</texture>
+            <hint>st_inv_sort_medicine_hint</hint>
+        </medicine_btn>
+
+        <artefacts_btn x="172" y="3" width="30" height="30" stretch="1" light_anim="ui_slow_blinking_alpha">
+            <window_name>filter_artefacts_btn</window_name>
+            <texture>ui_filter_artefacts_btn</texture>
+            <hint>st_inv_sort_artefacts_hint</hint>
+        </artefacts_btn>
+
+        <other_btn x="205" y="3" width="30" height="30" stretch="1" light_anim="ui_slow_blinking_alpha">
+            <window_name>filter_other_btn</window_name>
+            <texture>ui_filter_other_btn</texture>
+            <hint>st_inv_sort_consumables_hint</hint>
+        </other_btn>
+    </filters_buttons>
 </w>

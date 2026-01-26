@@ -36,6 +36,7 @@
 #include "ui_drop_amount.h"
 #include "../game_sv_single.h"
 #include "ai_object_location.h"
+#include "medicine.h"
 
 #define				CAR_BODY_XML		"carbody_new.xml"
 #define				CARBODY_ITEM_XML	"carbody_item.xml"
@@ -522,9 +523,6 @@ bool CUICarBodyWnd::OnKeyboardAction(int dik, EUIMessages keyboard_action)
 	}
 	return false;
 }
-
-#include "../medkit.h"
-#include "../antirad.h"
 
 void CUICarBodyWnd::ActivatePropertiesBox()
 {

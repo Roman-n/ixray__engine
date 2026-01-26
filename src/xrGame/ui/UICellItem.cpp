@@ -435,6 +435,23 @@ void CUICellItem::SetCustomDraw(ICustomDrawCellItem* c)
 	m_custom_draw = c;
 }
 
+void CUICellItem::SetTransparencyForAllCellContent(const u32 alphaValue) //MNP
+{
+    u32 colorBefore;
+
+    colorBefore = this->GetTextureColor();
+    this->SetTextureColor(subst_alpha(colorBefore, alphaValue));
+
+    colorBefore = m_pConditionState->m_UIProgressItem.GetTextureColor();
+    m_pConditionState->m_UIProgressItem.SetTextureColor(subst_alpha(colorBefore, alphaValue));
+
+    colorBefore = m_text->GetTextureColor();
+    m_text->SetTextureColor(subst_alpha(colorBefore, alphaValue));
+
+    colorBefore = m_text->TextItemControl()->GetTextColor();
+    m_text->TextItemControl()->SetTextColor(subst_alpha(colorBefore, alphaValue));
+}
+
 // -------------------------------------------------------------------------------------------------
 
 CUIDragItem::CUIDragItem(CUICellItem* parent)

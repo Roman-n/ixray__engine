@@ -3,7 +3,7 @@ GroupControlSection	= spawn_group
 discovery_dependency =
 ;$spawn 				= "food and drugs\booster"
 $prefetch 			= 8
-class				= S_FOOD
+class               = II_STIM
 cform				= skeleton
 visual				= dynamics\devices\dev_aptechka\dev_aptechka_low.ogf
 description			= default
@@ -286,6 +286,7 @@ eat_satiety 			= 0.0
 use_sound			= interface\inv_softdrink
 
 [bandage]:booster
+class               = II_BANDG
 $spawn 				= "food and drugs\bandage"
 visual				= dynamics\devices\dev_bandage\dev_bandage.ogf
 description			= st_bandage_descr
@@ -307,6 +308,7 @@ use_sound			= interface\inv_bandage
 
 ;antirad new
 [antirad]:booster
+class               = II_ANTIR
 $spawn 				= "food and drugs\antirad"
 visual				= dynamics\devices\dev_antirad\dev_antirad.ogf
 inv_name			= st_antirad
@@ -330,6 +332,7 @@ use_sound			= interface\inv_pills
 
 ;medikits new
 [medkit_script]:booster ;Do not use! Used in xr_wounded
+class               = II_MEDKI
 ;$spawn 				= "food and drugs\medkit_script"
 visual				= dynamics\devices\dev_aptechka\dev_aptechka_low.ogf
 inv_name			= st_medkit
@@ -354,6 +357,7 @@ use_sound			= interface\inv_medkit
 
 
 [medkit]:booster
+class               = II_MEDKI
 $spawn 				= "food and drugs\medkit"
 visual				= dynamics\devices\dev_aptechka\dev_aptechka_low.ogf
 inv_name			= st_medkit
@@ -375,6 +379,7 @@ boost_bleeding_restore	= 0.005
 use_sound			= interface\inv_medkit
 
 [medkit_army]:booster
+class               = II_MEDKI
 $spawn 				= "food and drugs\medkit_army"
 visual				= dynamics\devices\dev_aptechka\dev_aptechka_high.ogf
 inv_name			= st_medkit_army
@@ -396,6 +401,7 @@ boost_bleeding_restore	= 0.02
 use_sound			= interface\inv_medkit
 
 [medkit_scientic]:booster
+class               = II_MEDKI
 $spawn 				= "food and drugs\medkit_scientic"
 visual				= dynamics\devices\dev_aptechka\dev_aptechka_mid.ogf
 inv_name			= st_medkit_science
